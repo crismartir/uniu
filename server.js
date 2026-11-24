@@ -42,6 +42,69 @@ if(!store.demoSeeded){
   );
   store.demoSeeded=true;save();
 }
+// Completa demonstrações antigas sem duplicar posts nem alterar conteúdo real.
+// As imagens são assets locais do app, evitando dependência de URLs externas.
+let demoMediaChanged=false;
+const demoMedia={900001:'/demo/persona-01.png',900002:'/demo/persona-02.png'};
+for(const [id,imageUrl] of Object.entries(demoMedia)){
+  const post=store.posts.find(item=>item.id===Number(id)&&item.demo===true);
+  if(post&&!post.imageUrl){post.imageUrl=imageUrl;demoMediaChanged=true;}
+}
+if(demoMediaChanged)save();
+// Lote demonstrativo do propósito do produto: 30 posts de perfis fictícios,
+// cada um com foto local e uma reação inicial do Mimo. Não participa de match.
+const demoPostTexts=[
+  'Compatibilidade começa quando a gente consegue falar sobre o que realmente importa, sem tentar parecer outra pessoa.',
+  'Uma boa conversa tem curiosidade, escuta e espaço para dizer “ainda não sei”.',
+  'Qual pequeno hábito ajuda você a se sentir em casa ao lado de alguém?',
+  'Afinidade não é gostar de tudo igual; é conseguir respeitar diferenças importantes.',
+  'Hoje escolhi uma pergunta simples em vez de uma impressão rápida: o que te dá energia?',
+  'Relacionamentos saudáveis também precisam de limites claros e combinados possíveis.',
+  'Antes de marcar um encontro, gosto de combinar lugar público, horário e como cada pessoa prefere chegar.',
+  'Uma conexão segura não pressiona por resposta imediata.',
+  'Comunidade boa é aquela em que pedir ajuda não vira motivo de vergonha.',
+  'Interesses em comum são uma porta de entrada; valores e cuidado sustentam a relação.',
+  'O que faz uma conversa ficar leve para você?',
+  'Uma pausa também pode ser uma forma honesta de cuidar da conversa.',
+  'Quando existe reciprocidade, os dois demonstram interesse — não apenas uma pessoa insiste.',
+  'Humor é melhor quando aproxima sem diminuir ninguém.',
+  'Estou aprendendo a dizer com gentileza o que é importante para mim.',
+  'Casais fortes não evitam conversas difíceis; aprendem a conduzi-las com respeito.',
+  'Uma atividade simples para dois: cada pessoa escolher uma música e contar por que ela importa.',
+  'Perguntas abertas ajudam a conhecer a pessoa por trás da foto.',
+  'Se algo parece urgente demais, pedir tempo é uma resposta válida.',
+  'Conexão não é performance. É consistência entre o que se diz e o que se faz.',
+  'Qual diferença de rotina você acha importante conversar antes de um relacionamento?',
+  'Apoio pode ser ouvir, perguntar e respeitar a solução que a outra pessoa escolher.',
+  'Uma comunidade acolhedora modera o desrespeito e protege quem participa.',
+  'A melhor primeira mensagem é específica, gentil e fácil de recusar.',
+  'Compatibilidade também envolve disponibilidade emocional e objetivos parecidos.',
+  'Hoje celebro uma conversa que terminou com clareza, mesmo sem virar encontro.',
+  'Construir confiança é uma sequência de pequenos comportamentos previsíveis.',
+  'Se você pudesse ensinar uma coisa sobre convivência, o que ensinaria?',
+  'Um encontro bom não precisa ser grandioso: café, presença e vontade de conhecer.',
+  'Relacionamentos duradouros continuam fazendo perguntas depois do primeiro match.'
+];
+const demoAuthors=['Rafael','Clara','André','Marina','Caio','Nina','Davi','Bia','Hugo','Sofia','Miguel','Ari','Helena','Bruno','Maya','Lucas','Noa','Gabriel','Isabela','Thiago','Renata','Yuri','Sam','Elisa','João','Lia','Tomás','Yasmin','Rafael','Clara'];
+let demoBatchChanged=false;
+for(let i=0;i<demoPostTexts.length;i++){
+  const id=900100+i;
+  let post=store.posts.find(item=>item.id===id&&item.demoBatch==='purpose-v1');
+  if(!post){
+    post={id,userId:0,author:demoAuthors[i],text:demoPostTexts[i],imageUrl:`/demo/persona-${String(i+1).padStart(2,'0')}.png`,interests:'afinidade, segurança, relacionamento',createdAt:new Date(Date.now()-i*3600000).toISOString(),demo:true,demoBatch:'purpose-v1'};
+    store.posts.push(post);demoBatchChanged=true;
+  }
+  if(!store.reactions.some(item=>item.postId===id&&item.userId===0)){
+    store.reactions.push({postId:id,userId:0,state:'curti',createdAt:post.createdAt});demoBatchChanged=true;
+  }
+}
+// Remove apenas um eventual registro excedente de uma versão anterior do lote.
+const staleDemoIds=new Set([900130]);
+const beforeDemoCount=store.posts.length;
+store.posts=store.posts.filter(item=>!(item.demoBatch==='purpose-v1'&&staleDemoIds.has(item.id)));
+store.reactions=store.reactions.filter(item=>!staleDemoIds.has(item.postId));
+if(store.posts.length!==beforeDemoCount)demoBatchChanged=true;
+if(demoBatchChanged)save();
 store.verifyTokens=store.verifyTokens&&typeof store.verifyTokens==='object'?store.verifyTokens:{};store.resetTokens=store.resetTokens&&typeof store.resetTokens==='object'?store.resetTokens:{};
 function save(){fs.mkdirSync(path.dirname(dataFile),{recursive:true});fs.writeFileSync(dataFile,JSON.stringify(store,null,2))}
 function passwordHash(password,salt=crypto.randomBytes(16).toString('hex')){return {salt,hash:crypto.scryptSync(password,salt,64).toString('hex')}}
