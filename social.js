@@ -3,6 +3,7 @@
   if(!token)return;
   const main=document.querySelector('main')||document.querySelector('.main');
   if(!main||document.querySelector('#unio-friendships'))return;
+  const client=window.UNIOSocial;
   const h={Authorization:'Bearer '+token,'Content-Type':'application/json'};
   const box=document.createElement('section');
   box.id='unio-friendships';
@@ -12,7 +13,7 @@
   const list=box.querySelector('#friend-list');
   const current=()=>Number(JSON.parse(localStorage.getItem('unio-user')||'{}').id);
   const load=async()=>{
-    const d=await fetch('/api/friendships',{headers:h}).then(r=>r.json());
+    const d=client?await client.friendships():await fetch('/api/friendships',{headers:h}).then(r=>r.json());
     const rows=d.friendships||[];
     list.innerHTML=rows.length?rows.map(x=>{
       const incoming=x.addresseeId!==current();
@@ -20,9 +21,9 @@
       const name=x.peer?.name||`Pessoa ${incoming?x.requesterId:x.addresseeId}`;
       return `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #ded6cf"><span>${name} · ${x.status}</span><span style="display:flex;gap:5px">${actions}</span></div>`;
     }).join(''):'<p style="color:#4b5750">Nenhum pedido ainda.</p>';
-    list.querySelectorAll('button[data-action]').forEach(b=>b.onclick=async()=>{await fetch('/api/friendships/'+b.dataset.id,{method:'PATCH',headers:h,body:JSON.stringify({status:b.dataset.action})});load()});
+    list.querySelectorAll('button[data-action]').forEach(b=>b.onclick=async()=>{if(client)await client.patch('/api/friendships/'+b.dataset.id,{status:b.dataset.action});else await fetch('/api/friendships/'+b.dataset.id,{method:'PATCH',headers:h,body:JSON.stringify({status:b.dataset.action})});load()});
   };
-  box.querySelector('#friend-send').onclick=async()=>{const target=Number(box.querySelector('#friend-target').value);if(!target)return;const r=await fetch('/api/friendships',{method:'POST',headers:h,body:JSON.stringify({targetUserId:target})});if(!r.ok){const d=await r.json();return alert(d.error||'Não foi possível enviar o pedido.')}box.querySelector('#friend-target').value='';load()};
+  box.querySelector('#friend-send').onclick=async()=>{const target=Number(box.querySelector('#friend-target').value);if(!target)return;try{if(client)await client.post('/api/friendships',{targetUserId:target});else{const r=await fetch('/api/friendships',{method:'POST',headers:h,body:JSON.stringify({targetUserId:target})});if(!r.ok){const d=await r.json();throw new Error(d.error)}}box.querySelector('#friend-target').value='';load()}catch(error){alert(error.message||'Não foi possível enviar o pedido.')}};
   box.querySelector('#friend-refresh').onclick=load;
   load();
 })();
