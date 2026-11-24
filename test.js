@@ -1,5 +1,6 @@
 const assert=require('node:assert/strict');
 const http=require('node:http');
+const fs=require('node:fs');
 const base=process.env.TEST_BASE||'http://localhost:4173';
 function request(path,method='GET',body,token){return new Promise((resolve,reject)=>{const u=new URL(path,base),headers=body?{'Content-Type':'application/json'}:{};if(token)headers.Authorization=`Bearer ${token}`;const req=http.request(u,{method,headers},res=>{let data='';res.on('data',c=>data+=c);res.on('end',()=>{let parsed=null;try{parsed=data?JSON.parse(data):null}catch{}resolve({status:res.statusCode,body:parsed})})});req.on('error',reject);if(body)req.end(JSON.stringify(body));else req.end()})}
 (async()=>{
@@ -8,6 +9,7 @@ for(const route of ['/','/auth.html','/auth.html?mode=register','/app.html','/ma
 const profiles=await request('/api/profiles');assert.equal(profiles.status,200);assert.ok(profiles.body.profiles.length>=3);
 const runId=`${Date.now()}-${process.pid}-${Math.random().toString(16).slice(2)}`,email=`test-${runId}@example.com`,credentials={email,password:'segredo123'};const reg=await request('/api/auth/register','POST',credentials);assert.equal(reg.status,201);assert.ok(reg.body.token);const token=reg.body.token;
 const other=await request('/api/auth/register','POST',{email:`other-${runId}@example.com`,password:'segredo123'});assert.equal(other.status,201);
+const resetEmail=`reset-${runId}@example.com`,resetPassword={email:resetEmail,password:'segredo123'},resetUser=await request('/api/auth/register','POST',resetPassword);assert.equal(resetUser.status,201);const resetRequested=await request('/api/auth/request-password-reset','POST',{email:resetEmail});assert.equal(resetRequested.status,200);assert.equal(resetRequested.body.token,undefined);const resetLog=fs.readFileSync('reset-delivery.log','utf8'),resetMatch=resetLog.match(new RegExp('email='+resetEmail.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')+' token=([a-f0-9]+)'));assert.ok(resetMatch,'reset token should be delivered through the configured development sink');const resetToken=resetMatch[1];assert.equal((await request('/api/auth/reset-password','POST',{token:resetToken,password:'nova-senha-123'})).status,200);assert.equal((await request('/api/me','GET',undefined,resetUser.body.token)).status,401);assert.equal((await request('/api/auth/reset-password','POST',{token:resetToken,password:'outra-senha-123'})).status,400);assert.equal((await request('/api/auth/login','POST',{email:resetEmail,password:'nova-senha-123'})).status,200);
 const me=await request('/api/me','GET',undefined,token);assert.equal(me.status,200);assert.equal(me.body.user.email,email);
 assert.equal((await request('/api/messages','POST',{text:'sem sessão'})).status,401);
 assert.equal((await request('/api/messages','POST',{recipientId:other.body.user.id,text:'sem amizade'},token)).status,403);assert.equal((await request('/api/messages','POST',{text:'sem destinatário'},token)).status,400);
