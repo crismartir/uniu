@@ -54,3 +54,23 @@ O UNIU deve parecer uma rede social madura, mas continuar sendo uma rede de afin
 ## Referência oficial
 
 O repositório oficial `bluesky-social/social-app` é licenciado sob MIT e reúne o aplicativo web, iOS e Android. A documentação do projeto descreve uma stack React/React Native/Expo/TypeScript, TanStack Query e um design system próprio. Esses padrões são adequados para referência e adaptação seletiva, não para duplicação do domínio do UNIU.
+
+## Auditoria da cópia de referência
+
+Foi feita uma cópia rasa do repositório oficial em:
+
+```text
+C:\Users\TecnoFenix\Documents\Codex\bluesky-social-app-reference
+```
+
+Commit auditado: `06f10a6`.
+
+Os pontos confirmados no código são:
+
+- `src/App.web.tsx` organiza providers de composer, mensagens e shell da aplicação;
+- `AGENTS.md` recomenda TanStack Query para estado remoto e ALF como design system;
+- `src/lib/api/feed-manip.ts` concentra manipulação/deduplicação do feed;
+- `src/view/com/composer/state/composer.ts` concentra o estado do composer;
+- a estrutura separa `screens`, `view`, `state`, `components` e `lib`, uma divisão útil para a futura migração do frontend do UNIU.
+
+Essa auditoria confirma que o valor principal a reaproveitar está no frontend e nos padrões de estado, não no modelo de dados. O repositório de referência permanece fora do diretório de produção do UNIU para evitar cópia acidental de rotas, dependências ou tabelas.
