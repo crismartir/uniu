@@ -1,5 +1,26 @@
 # Decisão arquitetural — adaptação do Bluesky no UNIU
 
+## Atualização de direção
+
+Após a validação do protótipo social, a direção recomendada passa a ser um
+piloto de integração mais amplo com o `bluesky-social/social-app`, usando o
+shell de rede social como fundação da experiência. A aplicação atual continua
+como fallback até que feed, autenticação, mídia, comunidades e acessibilidade
+sejam validados no novo shell.
+
+O Bluesky será a base de navegação, timeline, publicação e mídia; o domínio
+do UNIU continuará responsável por compatibilidade, match recíproco, Mimo,
+amizades, chat protegido, moderação, privacidade e multi-instância.
+
+### Próximo piloto técnico
+
+1. Clonar o `social-app` em diretório/worktree separado.
+2. Subir a aplicação sem alterar a produção atual.
+3. Mapear o contrato de feed e mídia para uma camada `unio-social-adapter`.
+4. Implementar primeiro uma timeline somente leitura com dados fictícios.
+5. Validar visualmente desktop/mobile e comparar com o feed atual.
+6. Migrar publicação, comentários e reações Mimo somente após o smoke test.
+
 ## Decisão
 
 Não copiar o repositório inteiro `bluesky-social/social-app` para dentro do UNIU.
