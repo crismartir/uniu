@@ -1,0 +1,11 @@
+(function(){
+  const style=document.createElement('style');style.textContent='@keyframes unio-lumi-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}.lumi{animation:unio-lumi-float 4s ease-in-out infinite}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}';document.head.appendChild(style);
+  const isMagic=location.pathname.endsWith('magic.html');
+  const header=document.querySelector('.top');
+  if(!header||document.querySelector('#experience-toggle'))return;
+  const b=document.createElement('button');b.id='experience-toggle';b.type='button';b.textContent=isMagic?'○ Clássica':'✦ Mágica';b.setAttribute('aria-label','Alternar experiência clássica ou mágica');b.style.cssText='border:1px solid '+(isMagic?'#d4b27a':'#ded6cf')+';border-radius:999px;padding:8px 12px;background:transparent;color:inherit;cursor:pointer;font-weight:700';
+  const anchor=header.querySelector('.user')||header;anchor.parentNode.insertBefore(b,anchor);
+  b.onclick=function(){localStorage.setItem('unio-experience',isMagic?'classic':'magic');location.href=isMagic?'app.html':'magic.html'};
+  if(!localStorage.getItem('unio-experience'))localStorage.setItem('unio-experience',isMagic?'magic':'classic');
+  if(!isMagic){const main=document.querySelector('main');if(main&&!document.querySelector('#lumi-entry')){const card=document.createElement('aside');card.id='lumi-entry';card.setAttribute('aria-live','polite');card.style.cssText='display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 14px;border:1px solid #d4b27a88;border-radius:16px;background:linear-gradient(100deg,#fffaf0,#f7f1e8);color:#25312e';card.innerHTML='<img src="unio-lumi.png" alt="Lumi" style="width:54px;height:54px;object-fit:contain"><div style="flex:1"><strong>Quer adicionar um pouco de luz?</strong><div style="color:#4b5750;font-size:13px">Ative a experiência mágica para usar estados, comentários e comunidades guiadas pela Lumi.</div></div><button type="button" style="border:0;border-radius:999px;padding:8px 12px;background:#d4b27a;color:#25312e;font-weight:800;cursor:pointer">Experimentar</button>';card.querySelector('button').onclick=()=>{localStorage.setItem('unio-experience','magic');location.href='magic.html'};main.prepend(card)}}
+})();

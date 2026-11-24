@@ -1,0 +1,11 @@
+*.log
+agb-status.json
+meta-status.json
+data*.json
+reset-delivery.log
+server-*.err.log
+server-*.out.log
+node_modules/
+.env
+.env.*
+!.env.example

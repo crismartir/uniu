@@ -1,0 +1,10 @@
+{
+  "name": "Vértice",
+  "short_name": "Vértice",
+  "description": "Conexões que fazem sentido.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d1020",
+  "theme_color": "#0d1020",
+  "icons": []
+}

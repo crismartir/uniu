@@ -1,0 +1,8 @@
+{
+  "name": "vertice-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demo independente de conexões e relacionamento",
+  "scripts": {"start":"node server.js","test":"node test.js"},
+  "engines": {"node":">=18"}
+}
