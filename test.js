@@ -6,6 +6,7 @@ function request(path,method='GET',body,token){return new Promise((resolve,rejec
 (async()=>{
 const health=await request('/api/health');assert.equal(health.status,200);assert.equal(health.body.ok,true);
 for(const route of ['/','/auth.html','/auth.html?mode=register','/app.html','/magic.html','/admin.html','/unio-lumi.png','/unio-footer-lumi.png','/mimo-reactions.png','/communities.js']){const smoke=await request(route);assert.equal(smoke.status,200,route+' should load');}
+const routeController=fs.readFileSync('route-controller.js','utf8');assert.match(routeController,/classList\.toggle\('active'/,'route controller should keep only the current private route active');assert.match(routeController,/aria-current/,'route controller should expose the current route semantically');
 const profiles=await request('/api/profiles');assert.equal(profiles.status,200);assert.ok(profiles.body.profiles.length>=3);
 const runId=`${Date.now()}-${process.pid}-${Math.random().toString(16).slice(2)}`,email=`test-${runId}@example.com`,credentials={email,password:'segredo123'};const reg=await request('/api/auth/register','POST',credentials);assert.equal(reg.status,201);assert.ok(reg.body.token);const token=reg.body.token;
 const other=await request('/api/auth/register','POST',{email:`other-${runId}@example.com`,password:'segredo123'});assert.equal(other.status,201);
